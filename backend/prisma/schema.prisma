@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model meetingmember {
+  MeetingMemberID Int       @id @default(autoincrement())
+  MeetingID       Int
+  StaffID         Int
+  IsPresent       Boolean?  @default(false)
+  Remarks         String?   @db.VarChar(255)
+  Created         DateTime? @default(now()) @db.DateTime(0)
+  Modified        DateTime? @default(now()) @db.DateTime(0)
+  meetings        meetings  @relation(fields: [MeetingID], references: [MeetingID], onUpdate: Restrict, map: "fk_meeting")
+  staff           staff     @relation(fields: [StaffID], references: [StaffID], onUpdate: Restrict, map: "fk_staff")
+
+  @@index([MeetingID], map: "fk_meeting")
+  @@index([StaffID], map: "fk_staff")
+}
+
+model meetings {
+  MeetingID            Int             @id @default(autoincrement())
+  MeetingDate          DateTime        @db.DateTime(0)
+  MeetingTypeID        Int
+  MeetingDescription   String?         @db.VarChar(255)
+  DocumentPath         String?         @db.VarChar(255)
+  Created              DateTime?       @default(now()) @db.DateTime(0)
+  Modified             DateTime?       @default(now()) @db.DateTime(0)
+  IsCancelled          Boolean?        @default(false)
+  CancellationDateTime DateTime?       @db.DateTime(0)
+  CancellationReason   String?         @db.VarChar(255)
+  meetingmember        meetingmember[]
+  meetingtype          meetingtype     @relation(fields: [MeetingTypeID], references: [MeetingTypeID], onUpdate: Restrict, map: "fk_meeting_type")
+
+  @@index([MeetingTypeID], map: "fk_meeting_type")
+}
+
+model meetingtype {
+  MeetingTypeID   Int        @id @default(autoincrement())
+  MeetingTypeName String     @db.VarChar(100)
+  Remarks         String?    @db.VarChar(255)
+  Created         DateTime?  @default(now()) @db.DateTime(0)
+  Modified        DateTime?  @default(now()) @db.DateTime(0)
+  meetings        meetings[]
+}
+
+model staff {
+  StaffID       Int             @id @default(autoincrement())
+  StaffName     String          @db.VarChar(100)
+  MobileNo      String?         @db.VarChar(15)
+  EmailAddress  String?         @db.VarChar(100)
+  Remarks       String?         @db.VarChar(255)
+  Created       DateTime?       @default(now()) @db.DateTime(0)
+  Modified      DateTime?       @default(now()) @db.DateTime(0)
+  meetingmember meetingmember[]
+}
+
+model users {
+  user_id  Int        @id @default(autoincrement())
+  name     String?    @db.VarChar(100)
+  email    String?    @unique(map: "email") @db.VarChar(100)
+  password String?    @db.VarChar(255)
+  role     users_role
+}
+
+enum users_role {
+  admin
+  meeting_convener
+  staff
+}
