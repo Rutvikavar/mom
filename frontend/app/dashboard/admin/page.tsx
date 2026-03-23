@@ -111,7 +111,12 @@ export default function AdminDashboard() {
                 {loading
                     ? Array.from({ length: 4 }).map((_, i) => <StatsCardSkeleton key={i} />)
                     : statsCards.map((stat, index) => (
-                        <Card key={index} variant="stats" className={stat.color}>
+                        <Card
+                            key={index}
+                            variant="stats"
+                            className={`${stat.color} opacity-0-init animate-slide-up`}
+                            style={{ animationDelay: `${index * 100}ms` }}
+                        >
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500">{stat.title}</p>
@@ -134,10 +139,11 @@ export default function AdminDashboard() {
                             <Link
                                 key={index}
                                 href={action.href}
-                                className="group p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all"
+                                className="group p-4 rounded-xl glass border border-white/60 hover:border-indigo-300 hover:bg-white/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg opacity-0-init animate-slide-up"
+                                style={{ animationDelay: `${(index + statsCards.length) * 100}ms` }}
                             >
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
+                                    <div className="p-2 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 group-hover:shadow-md group-hover:shadow-indigo-500/30">
                                         {action.icon}
                                     </div>
                                     <ArrowUpRight className="w-4 h-4 text-slate-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />

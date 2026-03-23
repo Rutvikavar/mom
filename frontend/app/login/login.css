@@ -77,7 +77,7 @@
 .avatar svg#monkey-hands {
     z-index: 2;
     transform-style: preserve-3d;
-    transform: translateY(calc(var(--sz-avatar) / 1.25)) rotateX(-21deg);
+    transform: translate3d(0, 0, 0) rotateX(0deg);
 }
 
 .avatar::before {
@@ -137,7 +137,7 @@
 }
 
 .blind-check:checked~.avatar svg#monkey-hands {
-    transform: translate3d(0, 0, 0) rotateX(0deg);
+    transform: translateY(calc(var(--sz-avatar) / 1.25)) rotateX(-21deg);
 }
 
 .avatar svg#monkey,
@@ -183,6 +183,17 @@
     }
 }
 
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.password-input-wrapper .input {
+    padding-right: calc(var(--blind-w) + 16px);
+    margin-bottom: 0 !important;
+}
+
 .card label.blind_input {
     -webkit-user-select: none;
     user-select: none;
@@ -190,19 +201,23 @@
     z-index: 4;
     position: absolute;
     border: none;
-    right: calc(var(--p) + (var(--input-px) / 2));
-    bottom: calc(var(--p) + var(--submit-h) + var(--space-y) + (var(--input-py) / 1) + 10px);
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     padding: 4px 8px;
     width: var(--blind-w);
-    border-radius: 6px;
+    border-radius: 8px;
     background-color: #fff;
     color: #64748b;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .card label.blind_input:hover {
@@ -210,13 +225,13 @@
     background-color: #f1f5f9;
 }
 
-.blind-check~label.blind_input span.show,
-.blind-check:checked~label.blind_input span.hide {
+.blind-check~.form .blind_input span.hide,
+.blind-check:checked~.form .blind_input span.show {
     display: none;
 }
 
-.blind-check~label.blind_input span.hide,
-.blind-check:checked~label.blind_input span.show {
+.blind-check~.form .blind_input span.show,
+.blind-check:checked~.form .blind_input span.hide {
     display: block;
 }
 
@@ -328,9 +343,6 @@
     transform: none;
 }
 
-.blind-check:checked~.form .input[type="text"] {
-    -webkit-text-security: disc;
-}
 
 .error-message {
     width: 100%;

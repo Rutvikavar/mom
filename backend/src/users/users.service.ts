@@ -32,19 +32,32 @@ export class UsersService {
 
     async create(data: { name: string; email: string; password: string; role: users_role }) {
         const hashedPassword = await bcrypt.hash(data.password, 10);
-        return this.prisma.users.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: hashedPassword,
-                role: data.role,
-            },
-            select: {
-                user_id: true,
-                name: true,
-                email: true,
-                role: true,
-            },
+
+        return this.prisma.$transaction(async (prisma) => {
+            const user = await prisma.users.create({
+                data: {
+                    name: data.name,
+                    email: data.email,
+                    password: hashedPassword,
+                    role: data.role,
+                },
+                select: {
+                    user_id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                },
+            });
+
+            // Keep 'staff' table synced so they appear as attendees in meetings
+            await prisma.staff.create({
+                data: {
+                    StaffName: data.name,
+                    EmailAddress: data.email,
+                }
+            });
+
+            return user;
         });
     }
 
@@ -53,21 +66,53 @@ export class UsersService {
         if (data.password) {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
-        return this.prisma.users.update({
-            where: { user_id: id },
-            data: updateData,
-            select: {
-                user_id: true,
-                name: true,
-                email: true,
-                role: true,
-            },
+
+        return this.prisma.$transaction(async (prisma) => {
+            const oldUser = await prisma.users.findUnique({ where: { user_id: id } });
+
+            const updatedUser = await prisma.users.update({
+                where: { user_id: id },
+                data: updateData,
+                select: {
+                    user_id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                },
+            });
+
+            if (oldUser && oldUser.email) {
+                const staffUpdateData: any = {};
+                if (data.name) staffUpdateData.StaffName = data.name;
+                if (data.email) staffUpdateData.EmailAddress = data.email;
+
+                if (Object.keys(staffUpdateData).length > 0) {
+                    await prisma.staff.updateMany({
+                        where: { EmailAddress: oldUser.email },
+                        data: staffUpdateData
+                    });
+                }
+            }
+
+            return updatedUser;
         });
     }
 
     async delete(id: number) {
-        return this.prisma.users.delete({
-            where: { user_id: id },
+        return this.prisma.$transaction(async (prisma) => {
+            const user = await prisma.users.findUnique({ where: { user_id: id } });
+
+            if (user && user.email) {
+                const staffs = await prisma.staff.findMany({ where: { EmailAddress: user.email } });
+                for (const s of staffs) {
+                    await prisma.meetingmember.deleteMany({ where: { StaffID: s.StaffID } });
+                    await prisma.staff.delete({ where: { StaffID: s.StaffID } });
+                }
+            }
+
+            return prisma.users.delete({
+                where: { user_id: id },
+            });
         });
     }
 

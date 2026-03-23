@@ -82,7 +82,8 @@ export default function CreateMeetingPage() {
             });
 
             addToast("success", "Meeting created successfully");
-            router.push("/dashboard/convener/meetings");
+            // Redirect to meetings list and pre-select the upcoming/pending filter
+            router.push("/dashboard/convener/meetings?status=upcoming");
         } catch (error: any) {
             console.error("Failed to create meeting:", error);
             addToast("error", error.response?.data?.message || "Failed to create meeting");

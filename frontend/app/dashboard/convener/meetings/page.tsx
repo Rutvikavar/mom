@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -34,6 +35,32 @@ export default function MeetingsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // If a status is provided via query (e.g. ?status=upcoming or ?status=pending), apply it on mount
+    useEffect(() => {
+        const s = searchParams?.get("status");
+        if (s) setStatusFilter(s === "pending" ? "upcoming" : s);
+    }, [searchParams]);
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value;
+        setStatusFilter(val);
+
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (val === "all") {
+                params.delete("status");
+            } else {
+                params.set("status", val === "pending" ? "upcoming" : val);
+            }
+            const query = params.toString();
+            router.replace(`/dashboard/convener/meetings${query ? `?${query}` : ""}`);
+        } catch (err) {
+            console.error("Failed to update URL params:", err);
+        }
+    };
     const [typeFilter, setTypeFilter] = useState("all");
 
     useEffect(() => {
@@ -58,6 +85,7 @@ export default function MeetingsPage() {
         const matchesStatus =
             statusFilter === "all" ||
             (statusFilter === "upcoming" && !isCompleted && !meeting.IsCancelled) ||
+            // 'completed' should mean meetings that have occurred (exclude cancelled)
             (statusFilter === "completed" && isCompleted) ||
             (statusFilter === "cancelled" && meeting.IsCancelled);
         const matchesType =
@@ -139,11 +167,11 @@ export default function MeetingsPage() {
                         <div className="flex gap-4">
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                                onChange={handleStatusChange}
                                 className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                             >
                                 <option value="all">All Status</option>
-                                <option value="upcoming">Upcoming</option>
+                                <option value="upcoming">Pending</option>
                                 <option value="completed">Completed</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>

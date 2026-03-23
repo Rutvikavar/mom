@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -45,5 +46,25 @@ export class AuthService {
                 role: user.role,
             },
         };
+    }
+
+    async directResetPassword(email: string, pass: string) {
+        const user = await this.prisma.users.findUnique({ where: { email } });
+        if (!user) {
+            throw new UnauthorizedException('User with this email does not exist');
+        }
+
+        const hashedPassword = await bcrypt.hash(pass, 10);
+
+        await this.prisma.users.update({
+            where: { email },
+            data: {
+                password: hashedPassword,
+                reset_token: null,
+                reset_token_expiry: null,
+            },
+        });
+
+        return { message: 'Password has been updated successfully' };
     }
 }

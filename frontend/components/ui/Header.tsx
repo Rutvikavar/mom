@@ -49,7 +49,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
     };
 
     return (
-        <header className="h-16 bg-white/80 backdrop-blur-lg border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="h-16 glass border border-white/40 shadow-sm rounded-2xl flex items-center justify-between px-6 transition-all duration-300">
             {/* Left Side */}
             <div className="flex items-center gap-4">
                 <button
@@ -85,14 +85,14 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
                 <div className="w-px h-8 bg-slate-200"></div>
 
                 {/* User Profile */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 group cursor-pointer">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-medium text-slate-800">{user.name || "User"}</p>
-                        <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
+                        <p className="text-sm font-medium text-slate-800 transition-colors group-hover:text-indigo-600">{user.name || "User"}</p>
+                        <Badge variant={getRoleBadgeVariant(user.role)} size="sm" className="shadow-sm group-hover:animate-pulse-soft">
                             {formatRole(user.role)}
                         </Badge>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-medium">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-medium shadow-md shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-indigo-500/40">
                         {getInitials(user.name || "U")}
                     </div>
                 </div>

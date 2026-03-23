@@ -207,8 +207,12 @@ export default function UsersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedUsers.map((user) => (
-                                <TableRow key={user.user_id}>
+                            {paginatedUsers.map((user, index) => (
+                                <TableRow
+                                    key={user.user_id}
+                                    className="opacity-0-init animate-slide-up"
+                                    style={{ animationDelay: `${index * 50}ms` }}
+                                >
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
@@ -264,58 +268,92 @@ export default function UsersPage() {
                 onClose={() => setIsModalOpen(false)}
                 title={editingUser ? "Edit User" : "Add New User"}
                 size="md"
-            >
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                        label="Full Name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        icon={<User className="w-5 h-5" />}
-                        placeholder="John Doe"
-                        required
-                    />
-                    <Input
-                        label="Email Address"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        icon={<Mail className="w-5 h-5" />}
-                        placeholder="john@example.com"
-                        required
-                    />
-                    <Input
-                        label={editingUser ? "Password (leave blank to keep current)" : "Password"}
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="••••••••"
-                        required={!editingUser}
-                    />
-                    <div className="space-y-1.5">
-                        <label className="block text-sm font-medium text-slate-700 ml-1">Role</label>
-                        <select
-                            value={formData.role}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    role: e.target.value as "admin" | "meeting_convener" | "staff",
-                                })
-                            }
-                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        >
-                            <option value="staff">Staff</option>
-                            <option value="meeting_convener">Meeting Convener</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4">
+                footer={
+                    <div className="flex items-center justify-end gap-3">
                         <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={saving}>
-                            {editingUser ? "Update User" : "Create User"}
+                        <Button
+                            type="submit"
+                            form="user-form"
+                            loading={saving}
+                            variant="primary"
+                        >
+                            {editingUser ? "Save Changes" : "Add User"}
                         </Button>
                     </div>
+                }
+            >
+                <form id="user-form" onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-3">
+                        <Input
+                            label="Full Name"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            icon={<User className="w-5 h-5 text-slate-400" />}
+                            placeholder="e.g. John Doe"
+                            required
+                        />
+
+                        <Input
+                            label="Email Address"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            icon={<Mail className="w-5 h-5 text-slate-400" />}
+                            placeholder="name@example.com"
+                            required
+                        />
+
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium text-slate-700 ml-1">
+                                System Role
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Badge variant={getRoleBadgeVariant(formData.role)} size="sm">
+                                        <span className="w-2 h-2 rounded-full bg-current"></span>
+                                    </Badge>
+                                </div>
+                                <select
+                                    value={formData.role}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            role: e.target.value as "admin" | "meeting_convener" | "staff",
+                                        })
+                                    }
+                                    className="w-full pl-12 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none transition-all hover:border-indigo-300"
+                                >
+                                    <option value="staff">Staff</option>
+                                    <option value="meeting_convener">Meeting Convener</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <Input
+                                label={editingUser ? "Change Password" : "Password"}
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                placeholder={editingUser ? "Leave blank to keep current" : "Secure password"}
+                                required={!editingUser}
+                                icon={
+                                    <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                }
+                            />
+                        </div>
+                    </div>
+                    {/* Buttons moved to Modal footer */}
                 </form>
             </Modal>
 

@@ -25,17 +25,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref
     ) => {
         const baseStyles =
-            "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus-ring disabled:opacity-50 disabled:cursor-not-allowed";
+            "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-300 focus-ring disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
 
         const variants = {
             primary:
-                "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40",
+                "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/40 border border-transparent hover:border-indigo-400/50",
             secondary:
-                "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-sm",
+                "bg-white/80 backdrop-blur-sm border border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300 shadow-sm hover:shadow-md",
             ghost:
-                "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 data-[state=active]:bg-slate-100",
             danger:
-                "bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25",
+                "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 text-white shadow-md shadow-red-500/25 hover:shadow-lg hover:shadow-red-500/40",
         };
 
         const sizes = {
