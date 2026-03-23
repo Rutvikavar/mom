@@ -65,7 +65,7 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
         return (
             <tr
                 ref={ref}
-                className={`${hover ? "hover:bg-slate-50 transition-colors" : ""} ${className}`}
+                className={`${hover ? "hover:bg-slate-50/80 hover:-translate-y-[1px] transition-all duration-200 hover:shadow-sm relative z-0 hover:z-10" : ""} ${className}`}
                 {...props}
             >
                 {children}
@@ -139,8 +139,8 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
                             key={page}
                             onClick={() => onPageChange(page)}
                             className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                    ? "bg-indigo-600 text-white"
-                                    : "hover:bg-slate-100 text-slate-600"
+                                ? "bg-indigo-600 text-white"
+                                : "hover:bg-slate-100 text-slate-600"
                                 }`}
                         >
                             {page}

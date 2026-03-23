@@ -183,8 +183,18 @@ export default function MeetingTypesPage() {
                 onClose={() => setIsModalOpen(false)}
                 title={editingType ? "Edit Meeting Type" : "Add Meeting Type"}
                 size="md"
+                footer={
+                    <div className="flex justify-end gap-3">
+                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" form="meeting-type-form" loading={saving}>
+                            {editingType ? "Update" : "Create"}
+                        </Button>
+                    </div>
+                }
             >
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form id="meeting-type-form" onSubmit={handleSubmit} className="space-y-4">
                     <Input
                         label="Meeting Type Name"
                         value={formData.MeetingTypeName}
@@ -203,14 +213,6 @@ export default function MeetingTypesPage() {
                             rows={3}
                             placeholder="Add any notes about this meeting type..."
                         />
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" loading={saving}>
-                            {editingType ? "Update" : "Create"}
-                        </Button>
                     </div>
                 </form>
             </Modal>
@@ -237,6 +239,6 @@ export default function MeetingTypesPage() {
                     </div>
                 </div>
             </Modal>
-        </div>
+        </div >
     );
 }

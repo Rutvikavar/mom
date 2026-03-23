@@ -18,60 +18,86 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const [user, setUser] = useState<User | null>(null);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
+    // Check authentication
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
+
         if (!storedUser) {
             router.push("/login");
             return;
         }
+
         setUser(JSON.parse(storedUser));
     }, [router]);
 
-    // Close mobile menu on route change
+    // Close mobile sidebar when route changes
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [pathname]);
 
+    // Loading state
     if (!user) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="animate-pulse text-indigo-600 font-medium">Loading...</div>
+                <div className="animate-pulse text-indigo-600 font-medium">
+                    Loading...
+                </div>
             </div>
         );
     }
 
     return (
         <ToastProvider>
-            <div className="min-h-screen bg-slate-50">
-                {/* Sidebar - Desktop */}
-                <div className="hidden lg:block">
-                    <Sidebar role={user.role} />
+            <div className="min-h-screen bg-mesh-animated flex">
+
+                {/* ================= Desktop Sidebar ================= */}
+                <div className="hidden lg:block z-40 p-4 pr-0 sticky top-0 h-screen">
+                    <Sidebar
+                        role={user.role}
+                        collapsed={sidebarCollapsed}
+                        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    />
                 </div>
 
-                {/* Mobile Sidebar Overlay */}
+                {/* ================= Mobile Sidebar ================= */}
                 {mobileMenuOpen && (
-                    <div className="lg:hidden fixed inset-0 z-50">
+                    <div className="lg:hidden z-50">
+                        {/* Overlay */}
                         <div
-                            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40"
                             onClick={() => setMobileMenuOpen(false)}
                         />
-                        <div className="relative w-64">
-                            <Sidebar role={user.role} />
-                        </div>
+
+                        {/* Sidebar Panel */}
+                        <Sidebar
+                            role={user.role}
+                            collapsed={false}
+                            onToggleCollapse={() => setMobileMenuOpen(false)}
+                        />
                     </div>
                 )}
 
-                {/* Main Content */}
-                <div className={`transition-all duration-300 ${sidebarCollapsed ? "lg:ml-20" : "lg:ml-64"}`}>
-                    <Header user={user} onMenuClick={() => setMobileMenuOpen(true)} />
-                    <main className="p-6">
-                        <div className="animate-fade-in">{children}</div>
+                {/* ================= Main Content ================= */}
+                <div className="flex-1 flex flex-col min-h-screen transition-all duration-300 min-w-0">
+
+                    {/* Header */}
+                    <div className="p-4 pb-0 z-30 sticky top-0">
+                        <Header
+                            user={user}
+                            onMenuClick={() => setMobileMenuOpen(true)}
+                        />
+                    </div>
+
+                    {/* Page Content */}
+                    <main className="flex-1 p-6 overflow-y-auto">
+                        {children}
                     </main>
+
                 </div>
             </div>
         </ToastProvider>

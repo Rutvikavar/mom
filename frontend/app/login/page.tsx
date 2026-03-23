@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -14,10 +14,59 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
+    // Check if user is already authenticated
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+
+        if (token && storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                if (user.role === "admin") {
+                    router.push("/dashboard/admin");
+                } else if (user.role === "meeting_convener") {
+                    router.push("/dashboard/convener");
+                } else {
+                    router.push("/dashboard/staff");
+                }
+            } catch (error) {
+                // Invalid stored data, clear it
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+            }
+        }
+    }, [router]);
+
+    const validateForm = () => {
+        if (!email.trim()) {
+            setError("Email is required.");
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError("Please enter a valid email address.");
+            return false;
+        }
+        if (!password) {
+            setError("Password is required.");
+            return false;
+        }
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters.");
+            return false;
+        }
+        return true;
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         setError("");
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const response = await api.post("/auth/login", { email, password });
@@ -26,10 +75,16 @@ export default function LoginPage() {
             localStorage.setItem("token", access_token);
             localStorage.setItem("user", JSON.stringify(user));
 
-            router.push("/dashboard");
+            if (user.role === "admin") {
+                router.push("/dashboard/admin");
+            } else if (user.role === "meeting_convener") {
+                router.push("/dashboard/convener");
+            } else {
+                router.push("/dashboard/staff");
+            }
         } catch (err: any) {
             setError(err.response?.data?.message || "Something went wrong. Please try again.");
-        } finally {
+            setPassword("");
             setLoading(false);
         }
     };
@@ -47,10 +102,6 @@ export default function LoginPage() {
                     hidden
                 />
 
-                <label htmlFor="blind-input" className="blind_input">
-                    <span className="hide">Hide</span>
-                    <span className="show">Show</span>
-                </label>
 
                 <form className="form" onSubmit={handleLogin}>
                     <div className="title">Sign In</div>
@@ -77,19 +128,25 @@ export default function LoginPage() {
 
                     <div className="frg_pss">
                         <label className="label_input" htmlFor="password-input">Password</label>
-                        <a href="#">Forgot password?</a>
+                        <a href="/forgot-password">Forgot password?</a>
                     </div>
-                    <input
-                        spellCheck="false"
-                        className="input"
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        id="password-input"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        required
-                    />
+                    <div className="password-input-wrapper">
+                        <input
+                            spellCheck="false"
+                            className="input"
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            id="password-input"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            required
+                        />
+                        <label htmlFor="blind-input" className="blind_input">
+                            <span className="hide">Hide</span>
+                            <span className="show">Show</span>
+                        </label>
+                    </div>
                     <button className="submit" type="submit" disabled={loading}>
                         {loading ? (
                             <span className="flex items-center justify-center gap-2">

@@ -19,7 +19,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         };
 
         const hoverStyles = hover
-            ? "hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-1 cursor-pointer"
+            ? "hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 cursor-pointer border hover:border-white"
             : "";
 
         return (

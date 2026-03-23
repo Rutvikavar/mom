@@ -25,6 +25,8 @@ interface NavItem {
 
 interface SidebarProps {
     role: "admin" | "meeting_convener" | "staff";
+    collapsed?: boolean;
+    onToggleCollapse?: () => void;
 }
 
 const adminNavItems: NavItem[] = [
@@ -45,9 +47,20 @@ const staffNavItems: NavItem[] = [
     { label: "My Meetings", href: "/dashboard/staff/meetings", icon: <ClipboardList className="w-5 h-5" /> },
 ];
 
-export default function Sidebar({ role }: SidebarProps) {
-    const [collapsed, setCollapsed] = useState(false);
+export default function Sidebar({ role, collapsed: extCollapsed, onToggleCollapse }: SidebarProps) {
+    const [intCollapsed, setIntCollapsed] = useState(false);
     const pathname = usePathname();
+
+    const isControlled = extCollapsed !== undefined;
+    const collapsed = isControlled ? extCollapsed : intCollapsed;
+
+    const toggleCollapse = () => {
+        if (isControlled && onToggleCollapse) {
+            onToggleCollapse();
+        } else {
+            setIntCollapsed(!intCollapsed);
+        }
+    };
 
     const navItems =
         role === "admin"
@@ -66,13 +79,13 @@ export default function Sidebar({ role }: SidebarProps) {
     return (
         <aside
             className={`
-        fixed left-0 top-0 h-screen bg-white border-r border-slate-200 
-        transition-all duration-300 ease-in-out z-40
+        sticky left-4 top-4 h-[calc(100vh-2rem)] glass border border-white/40 shadow-xl shadow-indigo-500/5 rounded-2xl
+        transition-all duration-300 ease-in-out z-40 flex flex-col
         ${collapsed ? "w-20" : "w-64"}
       `}
         >
             {/* Logo */}
-            <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
+            <div className="h-16 flex-shrink-0 flex items-center justify-between px-4 border-b border-white/20">
                 {!collapsed && (
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
@@ -89,16 +102,16 @@ export default function Sidebar({ role }: SidebarProps) {
             </div>
 
             {/* Navigation */}
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-2 flex-1 overflow-y-auto custom-scrollbar">
                 {navItems.map((item) => (
                     <Link
                         key={item.href}
                         href={item.href}
                         className={`
-              flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+              flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group
               ${isActive(item.href)
-                                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25"
-                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30 font-medium scale-[1.02]"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200"
                             }
               ${collapsed ? "justify-center" : ""}
             `}
@@ -112,8 +125,8 @@ export default function Sidebar({ role }: SidebarProps) {
 
             {/* Collapse Button */}
             <button
-                onClick={() => setCollapsed(!collapsed)}
-                className="absolute bottom-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+                onClick={toggleCollapse}
+                className="hidden lg:block absolute bottom-4 right-4 p-2 rounded-lg bg-white/50 hover:bg-white/80 border border-slate-200 text-slate-600 transition-colors shadow-sm"
             >
                 {collapsed ? (
                     <ChevronRight className="w-4 h-4" />

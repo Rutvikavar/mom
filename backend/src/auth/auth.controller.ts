@@ -13,4 +13,9 @@ export class AuthController {
         }
         return this.authService.login(user);
     }
+
+    @Post('reset-password')
+    async resetPassword(@Body() resetDto: any) {
+        return this.authService.directResetPassword(resetDto.email, resetDto.password);
+    }
 }
